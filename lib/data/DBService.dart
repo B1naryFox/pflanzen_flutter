@@ -12,7 +12,7 @@ class DatabaseService {
   factory DatabaseService() => _service; // Factory
 
   // -- Database --
-  final String DBNAME = 'pflanzen';
+  final String DBTABLENAME = 'pflanzen';
   final String DBPATHNAME = 'pflanzen_sqflite.db';
   static Database? _database;
 
