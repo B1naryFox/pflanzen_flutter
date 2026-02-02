@@ -7,5 +7,4 @@ class Plant {
   String? imageUri;
 
   Plant(this.id, this.name, this.standort, this.giessintervall, this.zuletztGegossenDatum, [this.imageUri = null]);
-
 }
