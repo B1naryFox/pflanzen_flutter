@@ -15,10 +15,19 @@ class PflanzenFlutterApp extends StatelessWidget {
       title: 'Pflanzen Dev',
       //debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: .fromSeed(seedColor: Colors.green),
+        colorScheme: ColorScheme(
+          brightness: Brightness.light,
+          primary: Color(0xff41513f),
+          onPrimary: Colors.white,
+          secondary: Color(0xff5e7554),
+          onSecondary: Colors.black,
+          error: Color(0xfff44336),
+          onError: Color(0xff2E3B4E),
+          surface: Color(0xffDEDEDE),
+          onSurface: Colors.black,
+        ),
       ),
       home: const MainScreen(),
     );
   }
 }
-
