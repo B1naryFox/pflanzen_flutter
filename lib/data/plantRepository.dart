@@ -28,4 +28,7 @@ class PlantRepository {
         db_service.DBTABLENAME, where: 'id =?',
         whereArgs: [id]);
   }
+  void dispose(){
+
+  }
 }

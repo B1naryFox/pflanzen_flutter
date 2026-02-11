@@ -8,7 +8,7 @@ class Plant implements Comparable<Plant>{
   String zuletztGegossenDatum;
   String? imageUri;
 
-  Plant(this.id, this.name, this.standort, this.giessintervall, this.zuletztGegossenDatum, [this.imageUri = null]);
+  Plant(this.id, this.name, this.standort, this.giessintervall, this.zuletztGegossenDatum, [this.imageUri]);
 
   Map<String, Object?> toMap(){
     return {'id' : id, 'name' : name, 'standort' : standort, 'giessintervall' : giessintervall, 'zuletztGegossenDatum' : zuletztGegossenDatum, 'imageUri' : imageUri};

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:pflanzen_flutter/ui/plantAppBar.dart';
 import 'mainViewModel.dart';
 import 'package:pflanzen_flutter/data/plant.dart';
+import 'plantFormScreen.dart';
 
 class MainScreen extends StatefulWidget{
   const MainScreen({super.key});
@@ -19,14 +21,18 @@ class _MainScreenState extends State<MainScreen> {
       plants = mainVM.plants;
     });
   }
+
+  @override
+  void dispose(){
+    mainVM.dispose();
+    super.dispose();
+  }
   
   @override
   Widget build(BuildContext context){
     _update();
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Pflanzen')
-        ),
+        appBar: PlantAppBar(),
         body: _buildListView(),
         floatingActionButton: FloatingActionButton(
             onPressed: onPressed,
@@ -60,7 +66,12 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void onPressed() {
-    mainVM.addPlant(Plant(3, 'Test', 'standort', 3, DateTime.now().toString()));
+    _navigateToFormScreen(context, null);
+    // _navigateToFormScreen(context, Plant(3, 'Test', 'standort', 3, DateTime.now().toString()));
     _update();
+  }
+  
+  void _navigateToFormScreen(BuildContext context, Plant? plant){
+    Navigator.of(context).push(MaterialPageRoute(builder: (context) => PlantFormScreen()));
   }
 }

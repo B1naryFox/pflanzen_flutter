@@ -44,6 +44,10 @@ class MainViewModel{
     plants;
   }
 
+  void dispose() {
+
+  }
+
 }
 
 enum Sorting {name, giessdatum} // print(Color.blue.name); // 'blue'
