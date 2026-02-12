@@ -17,6 +17,7 @@ class MainViewModel{
     DateTime wateringDate = DateTime.parse(plant.zuletztGegossenDatum);
     var now = DateTime.now();
     int i = plant.calculateDaysUntilNextWatering(wateringDate, now, plant.giessintervall);
+    if (i < 0) i = 0;
     switch(i) {
       case 0:
         return 'Heute ist Gießtag\uD83D\uDCA7';
