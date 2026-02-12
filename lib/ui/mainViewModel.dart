@@ -40,14 +40,7 @@ class MainViewModel{
     return plants;
   }
 
-  void addPlant(Plant plant){
-    _plantRepository.addPlant(plant);
-    plants;
-  }
-
-  void dispose() {
-
-  }
+  void dispose() {}
 
 }
 

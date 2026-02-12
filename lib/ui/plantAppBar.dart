@@ -13,6 +13,7 @@ class PlantAppBar extends StatelessWidget implements PreferredSizeWidget {
       title: Text(title, style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
       ),
       backgroundColor: Theme.of(context).colorScheme.primary,
+      toolbarTextStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
     );
     // TODO: implement build
   }
