@@ -8,7 +8,14 @@ class MainViewModel extends ChangeNotifier{
   List<Plant> _plants = [];
   Sorting sortingBy = Sorting.name; // TODO get from Settings
 
-  List<Plant> get plants => sorted(sortingBy, _plants);
+  List<Plant> get plants {
+    return sorted(sortingBy, _plants);
+  }
+
+  Future<List<Plant>> getPlants() async {
+    await fetchPlants();
+    return plants;
+  }
 
   Future<void> fetchPlants() async {
     _plants = await _plantRepository.loadPlants();

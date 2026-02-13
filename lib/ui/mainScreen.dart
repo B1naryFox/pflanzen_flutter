@@ -13,11 +13,11 @@ class MainScreen extends StatefulWidget{
 
 class _MainScreenState extends State<MainScreen>{
   final MainViewModel mainVM = MainViewModel();
-  List<Plant> plants = [];
+  late List<Plant> plants;
+
   
   @override
   void initState(){
-    context.read<>.fetchPlants();
     super.initState();
   }
 
@@ -33,8 +33,15 @@ class _MainScreenState extends State<MainScreen>{
     return Scaffold(
       appBar: PlantAppBar(),
       backgroundColor: Theme.of(context).colorScheme.surface,
-      body: mainVM.isLoading ? Center(child: CircularProgressIndicator())
-      : _buildListView(),
+      body: FutureBuilder<List<Plant>>(
+          future: mainVM.getPlants(),
+          builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+              if (snapshot.data == null) {
+                return Center(child: CircularProgressIndicator(),);
+              }
+              plants = snapshot.data;
+              return _buildListView();
+      }),
       floatingActionButton: FloatingActionButton(
           onPressed: newPlant,
           child: Icon(Icons.add)),
@@ -48,7 +55,10 @@ class _MainScreenState extends State<MainScreen>{
       itemCount: plants.length,
       itemBuilder: (context, index) {
         var plant = plants[index];
-        return _buildPlantTile(plant);
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: _buildPlantTile(plant),
+        );
       },
     );
   }
@@ -94,4 +104,32 @@ class _MainScreenState extends State<MainScreen>{
       });
     }
   }
+}
+
+class PlantProvider extends ChangeNotifier {
+  final MainViewModel mainVM = MainViewModel();
+
+  bool isLoading = true;
+  List<Plant> plants = [];
+
+  Future<void> getAll() async {
+    isLoading = true;
+    notifyListeners();
+
+    plants = await mainVM.plants;
+
+    isLoading = false;
+    notifyListeners();
+  }
+
+  /*Future<void> add(String value) async {
+    isLoading = true;
+    notifyListeners();
+
+    await yourAddAsyncCall(value);
+
+    myData.add(value);
+
+    notifyListeners();
+  }*/
 }
