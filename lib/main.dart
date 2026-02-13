@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:pflanzen_flutter/ui/mainScreen.dart';
-import 'package:pflanzen_flutter/ui/plantFormScreen.dart';
 
 void main() {
   runApp(const PflanzenFlutterApp());
@@ -8,6 +7,7 @@ void main() {
 
 class PflanzenFlutterApp extends StatelessWidget {
   const PflanzenFlutterApp({super.key});
+
 
   // This widget is the root of your application.
   @override

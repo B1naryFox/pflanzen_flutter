@@ -25,7 +25,7 @@ class _PlantFormState extends State<PlantFormScreen> {
     if (!isValid) return;
     var plant = Plant(8, nameController.text, standortController.text, int.parse(intervallController.text), DateTime.now().toString());
     formVM.addPlant(plant);
-    Navigator.pop(context, true);
+    Navigator.pop(context);
   }
 
   @override

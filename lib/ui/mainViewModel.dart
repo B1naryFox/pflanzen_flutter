@@ -1,9 +1,10 @@
+import 'package:flutter/cupertino.dart';
 import 'package:pflanzen_flutter/data/plantRepository.dart';
 import 'package:pflanzen_flutter/data/plant.dart';
 
-class MainViewModel{
-
+class MainViewModel extends ChangeNotifier{
   final PlantRepository _plantRepository = PlantRepository();
+
   List<Plant> _plants = [];
   Sorting sortingBy = Sorting.name; // TODO get from Settings
 

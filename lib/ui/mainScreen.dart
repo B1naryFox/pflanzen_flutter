@@ -11,15 +11,14 @@ class MainScreen extends StatefulWidget{
   State<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class _MainScreenState extends State<MainScreen>{
   final MainViewModel mainVM = MainViewModel();
   List<Plant> plants = [];
-
-  void _update(){
-    setState(() {
-      mainVM.fetchPlants();
-      plants = mainVM.plants;
-    });
+  
+  @override
+  void initState(){
+    context.read<>.fetchPlants();
+    super.initState();
   }
 
   @override
@@ -27,18 +26,19 @@ class _MainScreenState extends State<MainScreen> {
     mainVM.dispose();
     super.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context){
-    _update();
+
     return Scaffold(
-        appBar: PlantAppBar(),
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        body: _buildListView(),
-        floatingActionButton: FloatingActionButton(
-            onPressed: newPlant,
-            child: Icon(Icons.add)),
-      );
+      appBar: PlantAppBar(),
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      body: mainVM.isLoading ? Center(child: CircularProgressIndicator())
+      : _buildListView(),
+      floatingActionButton: FloatingActionButton(
+          onPressed: newPlant,
+          child: Icon(Icons.add)),
+    );
   }
 
   ListView _buildListView(){
@@ -74,17 +74,24 @@ class _MainScreenState extends State<MainScreen> {
   void newPlant() async {
     _navigateToFormScreen(context, null);
     // _navigateToFormScreen(context, Plant(3, 'Test', 'standort', 3, DateTime.now().toString()));
-    _update();
   }
   
   Future<void> _navigateToFormScreen(BuildContext context, Plant? plant) async {
     if (plant == null) {
-      final reloadPage = await Navigator.of(context).push(MaterialPageRoute(builder: (context) => PlantFormScreen()));
-      if (reloadPage) {
-        _update();
-      }
+      Navigator.of(context).push(MaterialPageRoute(builder: (context) => PlantFormScreen())).then((value){
+        setState(() {
+          mainVM.fetchPlants();
+          plants = mainVM.plants;
+        });
+      });
+
     } else {
-      Navigator.of(context).push(MaterialPageRoute<void>(builder: (context) => PlantFormScreen(plant: plant)));
+      Navigator.of(context).push(MaterialPageRoute<void>(builder: (context) => PlantFormScreen(plant: plant))).then((value){
+        setState(() {
+          mainVM.fetchPlants();
+          plants = mainVM.plants;
+        });
+      });
     }
   }
 }
