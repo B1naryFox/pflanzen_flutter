@@ -36,7 +36,7 @@ class DatabaseService {
 
   Future<void> _onCreate(Database db, int version) async {
     await db.execute(
-        'CREATE TABLE $DBTABLENAME(id INTEGER PRIMARY KEY, name TEXT, standort TEXT, giessintervall INTEGER, zuletztGegossenDatum TEXT, imageUri TEXT)'
+        'CREATE TABLE $DBTABLENAME(id TEXT PRIMARY KEY, name TEXT, standort TEXT, giessintervall INTEGER, zuletztGegossenDatum TEXT, imageUri TEXT)'
     );
   }
 
