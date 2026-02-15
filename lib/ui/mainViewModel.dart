@@ -48,7 +48,10 @@ class MainViewModel extends ChangeNotifier{
     return plants;
   }
 
-  void dispose() {}
+  @override
+  void dispose() {
+    super.dispose();
+  }
 
 }
 

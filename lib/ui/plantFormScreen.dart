@@ -43,25 +43,33 @@ class _PlantFormState extends State<PlantFormScreen> {
         appBar: PlantAppBar(),
         body: Padding(
           padding: const EdgeInsets.all(8),
+
           child: SafeArea(
+
             child: Form(
               key: _formKey,
+
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
+
                 children: [
                   _buildTextField(0, 'Name', TextInputType.name, false, nameController),
                   _buildTextField(1, 'Standort', TextInputType.name, false, standortController),
                   _buildTextField(2, 'Gießintervall (in Tagen)', TextInputType.number, false, intervallController),
                   Padding(
                     padding: const EdgeInsets.only(top: 8.0),
+
                     child: _buildWateringDatePicker(dateController),
                   ),
-                  Center(child: Column(children: [
+                  Center(
+
+                      child: Column(children: [
 
                   ])), // TODO ImagePicker
                   ElevatedButton(
                       onPressed: onSave,
+
                       child: const Text('Save')),
                 ],
               ),

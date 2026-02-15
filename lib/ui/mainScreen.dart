@@ -106,30 +106,4 @@ class _MainScreenState extends State<MainScreen>{
   }
 }
 
-class PlantProvider extends ChangeNotifier {
-  final MainViewModel mainVM = MainViewModel();
 
-  bool isLoading = true;
-  List<Plant> plants = [];
-
-  Future<void> getAll() async {
-    isLoading = true;
-    notifyListeners();
-
-    plants = await mainVM.plants;
-
-    isLoading = false;
-    notifyListeners();
-  }
-
-  /*Future<void> add(String value) async {
-    isLoading = true;
-    notifyListeners();
-
-    await yourAddAsyncCall(value);
-
-    myData.add(value);
-
-    notifyListeners();
-  }*/
-}
