@@ -14,4 +14,14 @@ class PlantFormViewModel {
     _plantRepository.updatePlant(plant);
   }
 
+  String? validator(String? value, String label) {
+    if (value == null || value.isEmpty) {
+      return '$label ist erforderlich';
+    }
+    if (label == 'Gießintervall (in Tagen)' && int.parse(value.toString()) <= 0) {
+      return 'Gießintervall muss größer als 0 sein';
+    }
+    return null;
+  }
+
 }

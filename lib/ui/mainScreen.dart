@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+
 import 'package:pflanzen_flutter/ui/plantAppBar.dart';
 import 'mainViewModel.dart';
 import 'package:pflanzen_flutter/data/plant.dart';
 import 'plantFormScreen.dart';
 
+// MainScreen/Homepage: Zeigt die Liste an gespeicherten Pflanzen an, einen SettingsMenu und einen AddButton
 class MainScreen extends StatefulWidget{
   const MainScreen({super.key});
 
@@ -33,6 +35,7 @@ class _MainScreenState extends State<MainScreen>{
     return Scaffold(
       appBar: PlantAppBar(),
       backgroundColor: Theme.of(context).colorScheme.surface,
+// FutureBuilder baut die List-Ansicht, wenn die Pflanzen erhalten wurden
       body: FutureBuilder<List<Plant>>(
           future: mainVM.getPlants(),
           builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
@@ -42,12 +45,14 @@ class _MainScreenState extends State<MainScreen>{
               plants = snapshot.data;
               return _buildListView();
       }),
+// AddButton: Weiterleitung zum Detail-/Form-Screen
       floatingActionButton: FloatingActionButton(
           onPressed: newPlant,
           child: Icon(Icons.add)),
     );
   }
 
+// ListView
   ListView _buildListView(){
     return ListView.builder(
       padding: EdgeInsets.all(10),
@@ -62,18 +67,21 @@ class _MainScreenState extends State<MainScreen>{
       },
     );
   }
-
+// ListTile
   ListTile _buildPlantTile(Plant plant){
     return ListTile(
-      onTap: (){_navigateToFormScreen(context, plant);},
-      leading: CircleAvatar(child: Text(plant.id.toString()),),
+      onTap: (){editPlant(plant);}, // Weiterleitung zum Detail-/Form-Screen mit zu editierender Pflanze
+      leading: Padding(
+        padding: const EdgeInsets.only(left: 4.0),
+        child: CircleAvatar(child: Text(plant.id.toString()),),
+      ),
       title: Text(plant.name, style: TextStyle(fontWeight: FontWeight.bold)),
       tileColor: Theme.of(context).colorScheme.onPrimary,
       subtitle: Text(mainVM.wateringMessage(plant)),
       trailing: IconButton(
           icon: Image.asset('assets/wateringCan.png'),
           iconSize: 50,
-          onPressed: () {}, // fun update WateredDate
+          onPressed: () {}, // TODO AlertConfirmation -> Update des Letzten Giessdatums -> Update WateringMessage
 
       ),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
@@ -83,7 +91,10 @@ class _MainScreenState extends State<MainScreen>{
 
   void newPlant() async {
     _navigateToFormScreen(context, null);
-    // _navigateToFormScreen(context, Plant(3, 'Test', 'standort', 3, DateTime.now().toString()));
+  }
+
+  void editPlant(Plant plant) async {
+    _navigateToFormScreen(context, plant);
   }
   
   Future<void> _navigateToFormScreen(BuildContext context, Plant? plant) async {
