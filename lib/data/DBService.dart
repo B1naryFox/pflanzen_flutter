@@ -18,11 +18,11 @@ class DatabaseService {
 
   Future<Database> get database async {
     if (_database != null) return _database!;
-    _database = await _innitDatabase();
+    _database = await innitDatabase();
     return _database!;
   }
 
-  Future<Database> _innitDatabase() async {
+  Future<Database> innitDatabase() async {
     final databasePath = await getDatabasesPath();
     final path = join(databasePath, DBPATHNAME);
 

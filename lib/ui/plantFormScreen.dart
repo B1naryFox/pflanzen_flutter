@@ -1,10 +1,9 @@
-import 'dart:io';
-
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart';
 
 import 'package:pflanzen_flutter/data/plant.dart';
 import 'package:pflanzen_flutter/ui/plantAppBar.dart';
@@ -27,7 +26,7 @@ class _PlantFormState extends State<PlantFormScreen> {
   late final TextEditingController intervallController = TextEditingController(text: widget.plant?.giessintervall.toString());
   late final TextEditingController dateController = TextEditingController(text: widget.plant?.zuletztGegossenDatum);
   final ImagePicker _imagePicker = ImagePicker();
-  File? selectedImage; // TODO getFileFromURI
+  XFile? selectedImage; // TODO getFileFromURI
 
   final GlobalKey<FormState> _formKey = GlobalKey();
   final PlantFormViewModel formVM = PlantFormViewModel();
@@ -84,11 +83,7 @@ class _PlantFormState extends State<PlantFormScreen> {
 // Bild und Button
                       child: Column(
                           children: [
-                              (selectedImage == null)
-                                ? Image.asset('assets/wateringCan.png')
-                                : Image.file(selectedImage!)
-                            ,
-                            IconButton(onPressed: getImage, icon: Icon(Icons.camera))
+                            IconButton(onPressed: (){}, icon: Icon(Icons.camera))
 
                   ])), // TODO ImagePicker
                   ElevatedButton(
@@ -153,17 +148,53 @@ class _PlantFormState extends State<PlantFormScreen> {
       });
     }
   }
-
-  Future getImage() async {
-    final File? image = (await _imagePicker.pickImage(source: ImageSource.camera)) as File?;
-    if (image == null) return;
-    
-    final String originalPath = (await getApplicationDocumentDirectory()).path;
-    final String filePath = basename(originalPath);
-    // final File imageLocalCopy = await selectedImage.copy(filePath)
-    setState(() {
-      selectedImage = image;
-    });
-  }
 }
+
+// Widget: Kamera aufrufen um ein Bild der Pflanze zu machen
+class ImageWidget extends StatefulWidget {
+  const ImageWidget({super.key, required this.camera});
+  final CameraDescription camera;
+
+  @override
+  State<StatefulWidget> createState() => ImageWidgetState();
+} // ImageWidget
+
+class ImageWidgetState extends State<ImageWidget> {
+  late CameraController _controller;
+  late Future<void> _initializeControllerFuture;
+
+  @override
+  void initState(){
+    super.initState();
+    _controller = CameraController(widget.camera, ResolutionPreset.medium);
+    _initializeControllerFuture = _controller.initialize();
+  }
+
+  @override
+  void dispose(){
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        FutureBuilder<void>(
+            future: _initializeControllerFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.done){
+                return CameraPreview(_controller);
+              }
+              else{
+                return const Center(child: CircularProgressIndicator());
+              }
+            }
+        ),
+        FloatingActionButton(onPressed: (){})
+      ],
+    );
+    
+  }
+} // ImageWidgetState
 

@@ -1,7 +1,15 @@
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:pflanzen_flutter/data/DBService.dart';
 import 'package:pflanzen_flutter/ui/mainScreen.dart';
+import 'dart:async';
 
-void main() {
+Future<void> main() async {
+
+  WidgetsFlutterBinding.ensureInitialized();
+  // await DatabaseService().innitDatabase();
+
+
   runApp(const PflanzenFlutterApp());
 }
 
