@@ -30,20 +30,18 @@
 	<string>Main</string>
 	<key>NSCameraUsageDescription</key>
     <string>Explanation on why the camera access is needed.</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>Explanation on why the Photo Library access is needed.</string>
     <key>NSMicrophoneUsageDescription</key>
     <string>Explanation on why the microphone access is needed.</string>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>

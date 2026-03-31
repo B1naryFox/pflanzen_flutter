@@ -1,9 +1,9 @@
-import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
+import 'dart:io';
 
 import 'package:pflanzen_flutter/data/plant.dart';
 import 'package:pflanzen_flutter/ui/plantAppBar.dart';
@@ -21,81 +21,138 @@ class PlantFormScreen extends StatefulWidget {
 
 class _PlantFormState extends State<PlantFormScreen> {
   // Controller zum Erreichen der Text Felder
-  late final TextEditingController nameController = TextEditingController(text: widget.plant?.name);
-  late final TextEditingController standortController = TextEditingController(text: widget.plant?.standort);
-  late final TextEditingController intervallController = TextEditingController(text: widget.plant?.giessintervall.toString());
-  late final TextEditingController dateController = TextEditingController(text: widget.plant?.zuletztGegossenDatum);
+  late final TextEditingController nameController = TextEditingController(
+    text: widget.plant?.name,
+  );
+  late final TextEditingController standortController = TextEditingController(
+    text: widget.plant?.standort,
+  );
+  late final TextEditingController intervallController = TextEditingController(
+    text: widget.plant?.giessintervall.toString(),
+  );
+  late final TextEditingController dateController = TextEditingController(
+    text: widget.plant?.zuletztGegossenDatum,
+  );
+
+  late XFile? selectedImageFile = (widget.plant?.imageUri == null) ? null : XFile(widget.plant!.imageUri!);
   final ImagePicker _imagePicker = ImagePicker();
-  XFile? selectedImage; // TODO getFileFromURI
+
 
   final GlobalKey<FormState> _formKey = GlobalKey();
   final PlantFormViewModel formVM = PlantFormViewModel();
 
-// Speicherung/Update einer Pflanze
+  // Speicherung/Update einer Pflanze
   Future<void> onSave() async {
-    final bool isValid = _formKey.currentState?.validate() ?? false; // Validierung der Text Felder
+    final bool isValid =
+        _formKey.currentState?.validate() ??
+        false; // Validierung der Text Felder
     if (!isValid) return;
+
     Plant plant;
     if (widget.plant == null) {
-      plant = Plant.newId(nameController.text, standortController.text,
-          int.parse(intervallController.text), dateController.text,); // TODO PathToImage
+      plant = Plant.newId(
+        nameController.text,
+        standortController.text,
+        int.parse(intervallController.text),
+        dateController.text,
+        await _persistImage()
+      );
+
       formVM.addPlant(plant);
-    }else{
-        plant = Plant(widget.plant!.id, nameController.text, standortController.text, int.parse(intervallController.text), dateController.text);
-        formVM.updatePlant(plant);
+
+    } else {
+      plant = Plant(
+        widget.plant!.id,
+        nameController.text,
+        standortController.text,
+        int.parse(intervallController.text),
+        dateController.text,
+        await _persistImage()
+      );
+      formVM.updatePlant(plant);
     }
-// Return to Main/Homescreen
-    Navigator.pop(
-        context as BuildContext
-    );
+    // Return to Main/Homescreen
+    Navigator.pop(context as BuildContext);
   }
 
   @override
   void dispose() {
+    nameController.dispose();
+    standortController.dispose();
+    intervallController.dispose();
+    dateController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-// Navigationsbar
-        appBar: PlantAppBar(),
-        body: Padding(
-          padding: const EdgeInsets.all(8),
-          child: SafeArea(
-// Form
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-// Text Felder
-                children: [
-                  _buildTextField(0, 'Name', TextInputType.name, false, nameController),
-                  _buildTextField(1, 'Standort', TextInputType.name, false, standortController),
-                  _buildTextField(2, 'Gießintervall (in Tagen)', TextInputType.number, false, intervallController),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-// Datum Text und Button
-                    child: _buildWateringDatePicker(dateController),
+      // Navigationsbar
+      appBar: PlantAppBar(),
+      body: Padding(
+        padding: const EdgeInsets.all(8),
+        child: SafeArea(
+          // Form
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              // Text Felder
+              children: [
+                _buildTextField(
+                  0,
+                  'Name',
+                  TextInputType.name,
+                  false,
+                  nameController,
+                ),
+                _buildTextField(
+                  1,
+                  'Standort',
+                  TextInputType.name,
+                  false,
+                  standortController,
+                ),
+                _buildTextField(
+                  2,
+                  'Gießintervall (in Tagen)',
+                  TextInputType.number,
+                  false,
+                  intervallController,
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  // Datum Text und Button
+                  child: _buildWateringDatePicker(dateController),
+                ),
+                Center(
+                  // Bild und Button
+                  child: Column(
+                    children: [
+                      Image(
+                       image: (selectedImageFile == null)
+                            ? AssetImage('assets/tuska_with_background.png')
+                            : FileImage(File(selectedImageFile!.path)) as ImageProvider,
+                        width: 300,
+                        height: 300,
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          _onImageButtonPressed(ImageSource.camera);
+                        },
+                        icon: Icon(Icons.camera),
+                      ),
+                    ],
                   ),
-                  Center(
-// Bild und Button
-                      child: Column(
-                          children: [
-                            IconButton(onPressed: (){}, icon: Icon(Icons.camera))
-
-                  ])), // TODO ImagePicker
-                  ElevatedButton(
-                      onPressed: onSave,
-
-                      child: const Text('Save')),
-                ],
-              ),
+                ),
+                ElevatedButton(onPressed: onSave, child: const Text('Speichern')),
+              ],
             ),
           ),
         ),
-      );
+      ),
+    );
   }
 
   TextFormField _buildTextField(
@@ -103,7 +160,7 @@ class _PlantFormState extends State<PlantFormScreen> {
     String label,
     TextInputType? keyboard,
     bool readOnly,
-    TextEditingController controller
+    TextEditingController controller,
   ) {
     return TextFormField(
       maxLines: 1,
@@ -117,20 +174,23 @@ class _PlantFormState extends State<PlantFormScreen> {
     );
   }
 
-  Row _buildWateringDatePicker(TextEditingController controller){
+  Row _buildWateringDatePicker(TextEditingController controller) {
     Intl.defaultLocale = 'en-US';
     String buttonText = 'Datum auswählen';
-    if (controller.text.isNotEmpty) buttonText = DateFormat('dd-MM-yyyy').format(DateTime.parse(controller.text));
+    if (controller.text.isNotEmpty) {
+      buttonText = DateFormat(
+        'dd-MM-yyyy',
+      ).format(DateTime.parse(controller.text));
+    }
 
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Expanded(
-            child: Text('Zuletzt Gegossen am')),
-        ElevatedButton(
-          onPressed: _selectDate,
-          child: Text(buttonText),
-        ),
+        Expanded(child: Text('Zuletzt Gegossen am')),
+        ElevatedButton(onPressed: () {
+          print("showing date picker");
+          _selectDate;
+          }, child: Text(buttonText)),
       ],
     );
   }
@@ -148,53 +208,30 @@ class _PlantFormState extends State<PlantFormScreen> {
       });
     }
   }
+
+  Future<void> _onImageButtonPressed(ImageSource imageSource) async {
+    try {
+      final XFile? pickedImage = await _imagePicker.pickImage(
+        source: imageSource,
+      );
+      setState(() {
+        if (pickedImage != null) {
+          selectedImageFile = pickedImage;
+        }
+      });
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
+  Future<String?> _persistImage() async {
+    String? imagePath;
+    if (selectedImageFile != null) {
+      final String dirPath = (await getApplicationDocumentsDirectory()).path;
+      final String fileName = basename(selectedImageFile!.path);
+      imagePath = '$dirPath/$fileName';
+      await selectedImageFile!.saveTo(imagePath);
+    }
+    return imagePath;
+  }
 }
-
-// Widget: Kamera aufrufen um ein Bild der Pflanze zu machen
-class ImageWidget extends StatefulWidget {
-  const ImageWidget({super.key, required this.camera});
-  final CameraDescription camera;
-
-  @override
-  State<StatefulWidget> createState() => ImageWidgetState();
-} // ImageWidget
-
-class ImageWidgetState extends State<ImageWidget> {
-  late CameraController _controller;
-  late Future<void> _initializeControllerFuture;
-
-  @override
-  void initState(){
-    super.initState();
-    _controller = CameraController(widget.camera, ResolutionPreset.medium);
-    _initializeControllerFuture = _controller.initialize();
-  }
-
-  @override
-  void dispose(){
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        FutureBuilder<void>(
-            future: _initializeControllerFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.done){
-                return CameraPreview(_controller);
-              }
-              else{
-                return const Center(child: CircularProgressIndicator());
-              }
-            }
-        ),
-        FloatingActionButton(onPressed: (){})
-      ],
-    );
-    
-  }
-} // ImageWidgetState
-
