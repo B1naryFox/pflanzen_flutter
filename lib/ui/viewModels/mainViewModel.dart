@@ -1,24 +1,32 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:pflanzen_flutter/data/plantRepository.dart';
 import 'package:pflanzen_flutter/data/plant.dart';
+import 'package:pflanzen_flutter/data/SharedPrefService.dart';
 
 class MainViewModel extends ChangeNotifier{
   final PlantRepository _plantRepository = PlantRepository();
+  final streamController = StreamController<List<Plant>>();
+  Stream<List<Plant>> get plantStream => streamController.stream;
 
   List<Plant> _plants = [];
-  Sorting sortingBy = Sorting.name; // TODO get from Settings
-
-  List<Plant> get plants {
-    return sorted(sortingBy, _plants);
-  }
-
-  Future<List<Plant>> getPlants() async {
-    await fetchPlants();
-    return plants;
-  }
+  Sorting sortingBy = Sorting.NAME; // TODO get from Settings
 
   Future<void> fetchPlants() async {
     _plants = await _plantRepository.loadPlants();
+    streamController.sink.add(sorted(sortingBy, _plants));
+  }
+
+  void onPressWaterPlant(Plant plant){
+    plant.watered();
+    _plantRepository.updatePlant(plant);
+    fetchPlants();
+  }
+
+  void deletePlant(Plant plant){
+    _plantRepository.deletePlant(plant.id);
+    fetchPlants();
   }
 
   String wateringMessage(Plant plant){
@@ -38,9 +46,9 @@ class MainViewModel extends ChangeNotifier{
 
   List<Plant> sorted(Sorting by, List<Plant> plants){
     switch (by) {
-      case Sorting.name:
+      case Sorting.NAME:
         plants.sort((a, b) => a.name.compareTo(b.name));
-      case Sorting.giessdatum:
+      case Sorting.GIESSDATUM:
         plants.sort((a, b) => a.compareTo(b)); // implemented in plant.dart
       default:
         throw UnsupportedError('Implementation of more sorting options');
@@ -50,9 +58,9 @@ class MainViewModel extends ChangeNotifier{
 
   @override
   void dispose() {
+    streamController.close();
     super.dispose();
   }
-
 }
 
-enum Sorting {name, giessdatum} // print(Color.blue.name); // 'blue'
+

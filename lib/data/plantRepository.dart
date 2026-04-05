@@ -22,7 +22,7 @@ class PlantRepository {
     await db.update(db_service.DBTABLENAME, plant.toMap(), where: 'id =?', whereArgs: [plant.id]);
   }
 
-  Future<void> deletePlant(int id) async {
+  Future<void> deletePlant(String id) async {
     final db = await db_service.database;
     await db.delete(
         db_service.DBTABLENAME, where: 'id =?',

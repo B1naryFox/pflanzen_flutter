@@ -36,4 +36,8 @@ class Plant implements Comparable<Plant>{
     final DateTime nextWateringDay = zuletztGegossenDatum.add(Duration(days: interval));
     return nextWateringDay.difference(now).inDays;
   }
+
+  void watered(){
+    zuletztGegossenDatum = DateTime.now().toString();
+  }
 }

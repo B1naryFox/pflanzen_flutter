@@ -1,12 +1,13 @@
-import 'package:camera/camera.dart';
+
 import 'package:flutter/material.dart';
-import 'package:pflanzen_flutter/data/DBService.dart';
-import 'package:pflanzen_flutter/ui/mainScreen.dart';
+import 'package:pflanzen_flutter/data/SharedPrefService.dart';
+import 'package:pflanzen_flutter/ui/screens/mainScreen.dart';
 import 'dart:async';
 
 Future<void> main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
+  await SharedPrefService.init();
   // await DatabaseService().innitDatabase();
 
 

@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart';
 import 'dart:io';
 
 import 'package:pflanzen_flutter/data/plant.dart';
 import 'package:pflanzen_flutter/ui/plantAppBar.dart';
-import 'package:pflanzen_flutter/ui/plantFormViewModel.dart';
+import 'package:pflanzen_flutter/ui/viewModels/plantFormViewModel.dart';
 
 // Form zur Erstellung neuer Pflanzen oder zur Bearbeitung dieser
 class PlantFormScreen extends StatefulWidget {
@@ -34,9 +32,10 @@ class _PlantFormState extends State<PlantFormScreen> {
     text: widget.plant?.zuletztGegossenDatum,
   );
 
-  late XFile? selectedImageFile = (widget.plant?.imageUri == null) ? null : XFile(widget.plant!.imageUri!);
+  late File? selectedImageFile = (widget.plant?.imageUri == null)
+      ? null
+      : File(widget.plant!.imageUri!);
   final ImagePicker _imagePicker = ImagePicker();
-
 
   final GlobalKey<FormState> _formKey = GlobalKey();
   final PlantFormViewModel formVM = PlantFormViewModel();
@@ -55,11 +54,10 @@ class _PlantFormState extends State<PlantFormScreen> {
         standortController.text,
         int.parse(intervallController.text),
         dateController.text,
-        await _persistImage()
+        await formVM.saveImageToPath(selectedImageFile),
       );
 
       formVM.addPlant(plant);
-
     } else {
       plant = Plant(
         widget.plant!.id,
@@ -67,12 +65,12 @@ class _PlantFormState extends State<PlantFormScreen> {
         standortController.text,
         int.parse(intervallController.text),
         dateController.text,
-        await _persistImage()
+        await formVM.saveImageToPath(selectedImageFile),
       );
       formVM.updatePlant(plant);
     }
     // Return to Main/Homescreen
-    Navigator.pop(context as BuildContext);
+    Navigator.pop(this.context);
   }
 
   @override
@@ -88,7 +86,7 @@ class _PlantFormState extends State<PlantFormScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       // Navigationsbar
-      appBar: PlantAppBar(),
+      appBar: PlantAppBar(false),
       body: Padding(
         padding: const EdgeInsets.all(8),
         child: SafeArea(
@@ -130,25 +128,57 @@ class _PlantFormState extends State<PlantFormScreen> {
                   // Bild und Button
                   child: Column(
                     children: [
-                      Image(
-                       image: (selectedImageFile == null)
-                            ? AssetImage('assets/tuska_with_background.png')
-                            : FileImage(File(selectedImageFile!.path)) as ImageProvider,
-                        width: 300,
-                        height: 300,
+                      // Bild
+                      Padding(
+                        padding: const EdgeInsets.only(left: 50, right: 50, top: 20, bottom: 20),
+                        child: AspectRatio(
+                          aspectRatio: 1,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              image: DecorationImage(
+                                fit: BoxFit.fitWidth,
+                                image: (selectedImageFile == null)
+                                    ? AssetImage(
+                                        'assets/tuska_with_background.png',
+                                      )
+                                    : FileImage(File(selectedImageFile!.path))
+                                          as ImageProvider,
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
-                      IconButton(
-                        onPressed: () {
-                          _onImageButtonPressed(ImageSource.camera);
-                        },
-                        icon: Icon(Icons.camera),
+                      // Button: Bild aufnemen
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            _onImageButtonPressed(ImageSource.camera);
+                          },
+                          icon: Icon(
+                            Icons.camera_alt,
+                            color: Theme.of(context).colorScheme.onSecondary,
+                          ),
+                          style: ButtonStyle(
+                            backgroundColor: WidgetStatePropertyAll(
+                              Theme.of(context).colorScheme.secondary,
+                            ),
+                          ),
+                          label: Text(
+                            'Bild aufnehmen',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSecondary,
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),
                 ),
-                ElevatedButton(onPressed: onSave, child: const Text('Speichern')),
+                _buildSaveDeleteRow(widget.plant != null)
               ],
             ),
+
           ),
         ),
       ),
@@ -176,9 +206,9 @@ class _PlantFormState extends State<PlantFormScreen> {
 
   Row _buildWateringDatePicker(TextEditingController controller) {
     Intl.defaultLocale = 'en-US';
-    String buttonText = 'Datum auswählen';
+    String dateText = '';
     if (controller.text.isNotEmpty) {
-      buttonText = DateFormat(
+      dateText = DateFormat(
         'dd-MM-yyyy',
       ).format(DateTime.parse(controller.text));
     }
@@ -186,21 +216,27 @@ class _PlantFormState extends State<PlantFormScreen> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Expanded(child: Text('Zuletzt Gegossen am')),
-        ElevatedButton(onPressed: () {
-          print("showing date picker");
-          _selectDate;
-          }, child: Text(buttonText)),
+        Expanded(child: Text('Zuletzt Gegossen am: $dateText')),
+        IconButton(
+          onPressed: _selectDate,
+          icon: Icon(Icons.calendar_month),
+          style: ButtonStyle(
+            backgroundColor: WidgetStatePropertyAll(
+              Theme.of(context).colorScheme.secondary,
+            ),
+          ),
+        ),
       ],
     );
   }
 
   Future<void> _selectDate() async {
     final DateTime? pickedDate = await showDatePicker(
-      context: context as BuildContext,
-      initialDate: DateTime(2021, 7, 25),
-      firstDate: DateTime(2021),
-      lastDate: DateTime(2022),
+      context: this.context,
+
+      firstDate: DateTime(2025),
+      initialDate: DateTime.now(),
+      lastDate: DateTime(2027),
     );
     if (pickedDate != null) {
       setState(() {
@@ -216,7 +252,7 @@ class _PlantFormState extends State<PlantFormScreen> {
       );
       setState(() {
         if (pickedImage != null) {
-          selectedImageFile = pickedImage;
+          selectedImageFile = File(pickedImage.path);
         }
       });
     } catch (e) {
@@ -224,14 +260,59 @@ class _PlantFormState extends State<PlantFormScreen> {
     }
   }
 
-  Future<String?> _persistImage() async {
-    String? imagePath;
-    if (selectedImageFile != null) {
-      final String dirPath = (await getApplicationDocumentsDirectory()).path;
-      final String fileName = basename(selectedImageFile!.path);
-      imagePath = '$dirPath/$fileName';
-      await selectedImageFile!.saveTo(imagePath);
+  Widget _buildSaveDeleteRow(bool showDelete) {
+    if (showDelete) {
+      return Row(
+        children: [
+          Expanded(
+            flex: 1,
+            child: Padding(
+              padding: const EdgeInsets.only(right: 10),
+              child: ElevatedButton(
+                  onPressed: (){
+                    formVM.deletePlant(widget.plant!);
+                    Navigator.pop(this.context);
+                  },
+                  style: ButtonStyle(
+                    backgroundColor: WidgetStatePropertyAll(
+                      Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+                  child: Text(
+                    'Löschen',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSecondary,
+                    ),
+                  ),
+                ),
+            ),
+          ),
+          Expanded(
+              flex: 2,
+              child: saveButton(300)
+          )
+        ],
+      );
+    } else {
+      return saveButton(double.infinity);
     }
-    return imagePath;
+  }
+
+  Widget saveButton(double width) {
+    return SizedBox(
+      width: width,
+      child: ElevatedButton(
+        onPressed: onSave,
+        style: ButtonStyle(
+          backgroundColor: WidgetStatePropertyAll(
+            Theme.of(context).colorScheme.secondary,
+          ),
+        ),
+        child: Text(
+          'Speichern',
+          style: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
+        ),
+      ),
+    );
   }
 }
