@@ -36,10 +36,13 @@ class _MainScreenState extends State<MainScreen>{
   Widget build(BuildContext context){
 
     return Scaffold(
-      appBar: PlantAppBar(true),
+      appBar: PlantAppBar(true,
+      onSettingsReturned: (){
+        _settingState();
+      }),
       backgroundColor: Theme.of(context).colorScheme.surface,
 
-// FutureBuilder baut die List-Ansicht, wenn die Pflanzen erhalten wurden
+// StreamBuilder baut die List-Ansicht, wenn die Pflanzen erhalten wurden
 
       body: 
       StreamBuilder<List<Plant>>(
@@ -136,19 +139,18 @@ class _MainScreenState extends State<MainScreen>{
   
   Future<void> _navigateToFormScreen(BuildContext context, Plant? plant) async {
     if (plant == null) {
-      Navigator.of(context).push(MaterialPageRoute(builder: (context) => PlantFormScreen())).then((value){
-        setState(() {
-          mainVM.fetchPlants();
-        });
-      });
+      Navigator.of(context).push(MaterialPageRoute(builder: (context) => PlantFormScreen())).then((value) {_settingState();});
 
     } else {
-      Navigator.of(context).push(MaterialPageRoute<void>(builder: (context) => PlantFormScreen(plant: plant))).then((value){
-        setState(() {
-          mainVM.fetchPlants();
-        });
-      });
+      Navigator.of(context).push(MaterialPageRoute<void>(builder: (context) => PlantFormScreen(plant: plant))).then((value) {_settingState();});
+
     }
+  }
+
+  void _settingState(){
+    setState(() {
+      mainVM.fetchPlants();
+    });
   }
 
   void _showWateringAlert(Plant plant) {

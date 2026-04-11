@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:pflanzen_flutter/data/NotificationService.dart';
 
 import 'package:pflanzen_flutter/ui/plantAppBar.dart';
 import 'package:pflanzen_flutter/data/SharedPrefService.dart';
+import 'package:pflanzen_flutter/ui/viewModels/mainViewModel.dart';
 
 class Settingsscreen extends StatefulWidget {
   const Settingsscreen({super.key});
@@ -12,7 +14,7 @@ class Settingsscreen extends StatefulWidget {
 
 class _SettingsscreenState extends State<Settingsscreen> {
   late Sorting sort;
-  late TimeOfDay time;
+  late TimeOfDay? time;
 
   @override
   void initState() {
@@ -21,12 +23,18 @@ class _SettingsscreenState extends State<Settingsscreen> {
     sort = Sorting.values[index ?? 0];
 
     var (hour, minute) = SharedPrefService.getNotificationTime();
-    time = TimeOfDay(hour: hour ?? 8, minute: minute ?? 0);
-    print('init state completed');
+    if (hour != null) {
+      time = TimeOfDay(hour: hour, minute: minute ?? 0);
+    }else{
+      time = TimeOfDay(hour: 0, minute: 0);
+    }
+
   }
 
   @override
   void dispose() {
+    MainViewModel().fetchPlants();
+    time = null;
     super.dispose();
   }
   
@@ -36,14 +44,17 @@ class _SettingsscreenState extends State<Settingsscreen> {
       appBar: PlantAppBar(false),
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           TextButton(onPressed: _showSortingOpt, child: Text('Sortierreihenfolge: ${sort.title}')),
-          TextButton(onPressed: _showTimePicker, child: Text('Benachrichtigungszeit: ${time}')),
-          TextButton(onPressed: _saveToPref, child: Text('Save to Preferences'))
+          TextButton(onPressed: _showTimePicker, child: Text('Benachrichtigungszeit: ${time ?? 'einstellen'}')),
+
         ],
       ),
     );
   }
+
+//TextButton(onPressed: _saveToPref, child: Text('Save to Preferences'))
 
   void _showSortingOpt(){
     SimpleDialog sortOpt = SimpleDialog(
@@ -54,6 +65,7 @@ class _SettingsscreenState extends State<Settingsscreen> {
             setState(() {
               sort = Sorting.NAME;
             });
+            SharedPrefService.setSort(sort.index);
             Navigator.of(context, rootNavigator: true).pop();
           },
           child: Text(Sorting.NAME.title),),
@@ -63,6 +75,7 @@ class _SettingsscreenState extends State<Settingsscreen> {
             setState(() {
               sort = Sorting.GIESSDATUM;
             });
+            SharedPrefService.setSort(sort.index);
             Navigator.of(context, rootNavigator: true).pop();
           },
           child: Text(Sorting.GIESSDATUM.title),)
@@ -76,18 +89,16 @@ class _SettingsscreenState extends State<Settingsscreen> {
   Future<void> _showTimePicker() async {
     final TimeOfDay? pickedTime = await showTimePicker(
       context: this.context,
-      initialTime: time,
+      initialTime: time ?? TimeOfDay(hour: 8, minute: 0),
       initialEntryMode: TimePickerEntryMode.dialOnly,
       orientation: Orientation.portrait,
     );
-    if (pickedTime == null) return ;
+    if (pickedTime == null || pickedTime == time) return ;
+    NotificationService.canceledNotification();
     setState(() {
       time = pickedTime;
+      SharedPrefService.setNotificationTime(time!.hour, time!.minute);
+      NotificationService.scheduleNotification(time: time!);
     });
-  }
-
-  void _saveToPref(){
-    SharedPrefService.setSort(sort.index);
-    SharedPrefService.setNotificationTime(time.hour, time.minute);
   }
 }

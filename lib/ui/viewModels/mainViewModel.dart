@@ -11,7 +11,7 @@ class MainViewModel extends ChangeNotifier{
   Stream<List<Plant>> get plantStream => streamController.stream;
 
   List<Plant> _plants = [];
-  Sorting sortingBy = Sorting.NAME; // TODO get from Settings
+  Sorting? _sortingBy;
 
   Future<void> fetchPlants() async {
     _plants = await _plantRepository.loadPlants();
@@ -42,6 +42,11 @@ class MainViewModel extends ChangeNotifier{
       default:
         return 'In $i Tagen gießen';
     }
+  }
+
+  Sorting get sortingBy{
+    _sortingBy = Sorting.values[SharedPrefService.getSortIndex() ?? 0];
+    return _sortingBy!;
   }
 
   List<Plant> sorted(Sorting by, List<Plant> plants){

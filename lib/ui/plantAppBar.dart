@@ -6,8 +6,9 @@ class PlantAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Size preferredSize = Size.fromHeight(50);
   final String title = 'Pflanzen';
   final bool showSettingsButton;
+  final VoidCallback? onSettingsReturned;
 
-  PlantAppBar(this.showSettingsButton, {super.key});
+  PlantAppBar(this.showSettingsButton, {this.onSettingsReturned, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +28,10 @@ class PlantAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   void navigateToSettings(context){
-    Navigator.of(context).push(MaterialPageRoute(builder: (context) => Settingsscreen()));
+    Navigator.push(
+      context,
+      MaterialPageRoute( builder: (context) => Settingsscreen()),
+    ).then((_){onSettingsReturned?.call();});
   }
 
 }

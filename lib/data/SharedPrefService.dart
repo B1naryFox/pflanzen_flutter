@@ -32,6 +32,7 @@ class SharedPrefService {
 
   static Future<bool> setTime(String key, int time) async{
     var prefs = await _instance;
+    print('setting $key');
     return prefs?.setInt(key, time) ?? Future.value((false));
   }
 

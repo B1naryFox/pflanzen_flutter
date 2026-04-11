@@ -1,13 +1,18 @@
 
 import 'package:flutter/material.dart';
+import 'package:pflanzen_flutter/data/NotificationService.dart';
 import 'package:pflanzen_flutter/data/SharedPrefService.dart';
 import 'package:pflanzen_flutter/ui/screens/mainScreen.dart';
 import 'dart:async';
+import 'package:timezone/data/latest.dart' as tz;
 
 Future<void> main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
   await SharedPrefService.init();
+  NotificationService.init();
+  tz.initializeTimeZones();
+  //final String timeZoneName = await FlutterTimezone.getLocalTimezone():
   // await DatabaseService().innitDatabase();
 
 
