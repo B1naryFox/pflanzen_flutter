@@ -5,11 +5,11 @@ import 'package:sqflite/sqflite.dart';
 class DatabaseService {
 
   // Singleton
-  static final DatabaseService _service = DatabaseService._();
+  static final DatabaseService _dbService = DatabaseService._privateConstructor();
 
   // Constructors
-  DatabaseService._(); // Private
-  factory DatabaseService() => _service; // Factory
+  DatabaseService._privateConstructor(); // Private Constructor is used to initialize the singleton
+  factory DatabaseService() => _dbService; // Factory Constructor returns the instance of the singleton instead of creating a new one
 
   // -- Database --
   final String DBTABLENAME = 'pflanzen';
@@ -39,5 +39,4 @@ class DatabaseService {
         'CREATE TABLE $DBTABLENAME(id TEXT PRIMARY KEY, name TEXT, standort TEXT, giessintervall INTEGER, zuletztGegossenDatum TEXT, imageUri TEXT)'
     );
   }
-
 }

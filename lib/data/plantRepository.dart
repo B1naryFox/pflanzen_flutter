@@ -4,8 +4,15 @@ import 'package:pflanzen_flutter/data/plant.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 class PlantRepository {
-  DatabaseService db_service = DatabaseService();
+  final DatabaseService dbService;
+  // Singleton
+  static final PlantRepository _plantRepository = PlantRepository._privateConstructor(DatabaseService());
 
+  // Constructors
+  PlantRepository._privateConstructor(this.dbService);
+  factory PlantRepository() => _plantRepository;
+
+  // -- CRUD --
   Future<List<Plant>> loadPlants() async {
     final db = await db_service.database;
     final List<Map<String, dynamic>> plantMaps = await db.query(db_service.DBTABLENAME);
@@ -25,7 +32,7 @@ class PlantRepository {
   Future<void> deletePlant(String id) async {
     final db = await db_service.database;
     await db.delete(
-        db_service.DBTABLENAME, where: 'id =?',
+        dbService.DBTABLENAME, where: 'id =?',
         whereArgs: [id]);
   }
   void dispose(){
