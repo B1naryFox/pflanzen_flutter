@@ -18,11 +18,11 @@ class DatabaseService {
 
   Future<Database> get database async {
     if (_database != null) return _database!;
-    _database = await _innitDatabase();
+    _database = await innitDatabase();
     return _database!;
   }
 
-  Future<Database> _innitDatabase() async {
+  Future<Database> innitDatabase() async {
     final databasePath = await getDatabasesPath();
     final path = join(databasePath, DBPATHNAME);
 
@@ -36,7 +36,7 @@ class DatabaseService {
 
   Future<void> _onCreate(Database db, int version) async {
     await db.execute(
-        'CREATE TABLE $DBTABLENAME(id INTEGER PRIMARY KEY, name TEXT, standort TEXT, giessintervall INTEGER, zuletztGegossenDatum TEXT, imageUri TEXT)'
+        'CREATE TABLE $DBTABLENAME(id TEXT PRIMARY KEY, name TEXT, standort TEXT, giessintervall INTEGER, zuletztGegossenDatum TEXT, imageUri TEXT)'
     );
   }
 }

@@ -1,7 +1,6 @@
 
 import 'package:pflanzen_flutter/data/DBService.dart';
 import 'package:pflanzen_flutter/data/plant.dart';
-import 'package:pflanzen_flutter/data/plantService.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 class PlantRepository {
@@ -15,25 +14,28 @@ class PlantRepository {
 
   // -- CRUD --
   Future<List<Plant>> loadPlants() async {
-    final db = await dbService.database;
-    final List<Map<String, dynamic>> plantMaps = await db.query(dbService.DBTABLENAME);
-    return List.generate(plantMaps.length, (index) => PlantService.mapToPlant(plantMaps[index]));
+    final db = await db_service.database;
+    final List<Map<String, dynamic>> plantMaps = await db.query(db_service.DBTABLENAME);
+    return List.generate(plantMaps.length, (index) => Plant.fromMap(plantMaps[index]));
   }
   
   Future<void> addPlant(Plant plant) async {
-     final db = await dbService.database;
-     await db.insert(dbService.DBTABLENAME, PlantService.plantToMap(plant), conflictAlgorithm: ConflictAlgorithm.replace);
+     final db = await db_service.database;
+     await db.insert(db_service.DBTABLENAME, plant.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future<void> updatePlant(Plant plant) async {
-    final db = await dbService.database;
-    await db.update(dbService.DBTABLENAME, PlantService.plantToMap(plant), where: 'id =?', whereArgs: [plant.id]);
+    final db = await db_service.database;
+    await db.update(db_service.DBTABLENAME, plant.toMap(), where: 'id =?', whereArgs: [plant.id]);
   }
 
-  Future<void> deletePlant(int id) async {
-    final db = await dbService.database;
+  Future<void> deletePlant(String id) async {
+    final db = await db_service.database;
     await db.delete(
         dbService.DBTABLENAME, where: 'id =?',
         whereArgs: [id]);
+  }
+  void dispose(){
+
   }
 }
